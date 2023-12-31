@@ -2,60 +2,43 @@ import os
 import pyrealsense2.pyrealsense2 as rs
 import numpy as np
 import cv2
+import asyncio
 
-# Set an environment variable to disable GUI
 os.environ["DISPLAY"] = ":0.0"
 
-def process_frames():
-    # Create a context
+async def process_frames():
     pipeline = rs.pipeline()
     config = rs.config()
-
-    # Enable both depth and color streams with the desired settings
     config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
     config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
-
-    # Start the pipeline
     pipeline.start(config)
 
     try:
         while True:
-            # Wait for a coherent pair of frames: depth and color
-            frames = pipeline.wait_for_frames()
+            frames = await asyncio.to_thread(pipeline.wait_for_frames)
             depth_frame = frames.get_depth_frame()
             color_frame = frames.get_color_frame()
 
             if not depth_frame or not color_frame:
                 continue
 
-            # Get the color image as a numpy array
             color_image = np.asanyarray(color_frame.get_data())
-
-            # Convert the color image to HSV
             hsv = cv2.cvtColor(color_image, cv2.COLOR_BGR2HSV)
 
-            # Define lower and upper bounds for the red color
             lower_red1 = np.array([0, 100, 100])
             upper_red1 = np.array([10, 255, 255])
             lower_red2 = np.array([160, 100, 100])
             upper_red2 = np.array([180, 255, 255])
 
-            # Create masks for both ranges of red
             mask1 = cv2.inRange(hsv, lower_red1, upper_red1)
             mask2 = cv2.inRange(hsv, lower_red2, upper_red2)
-
-            # Combine both masks to detect red colors
             mask = cv2.bitwise_or(mask1, mask2)
 
-            # Apply morphological operations to clean up the mask
             kernel = np.ones((5, 5), np.uint8)
             mask = cv2.erode(mask, kernel, iterations=1)
             mask = cv2.dilate(mask, kernel, iterations=2)
 
-            # Find contours in the mask
             contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-            # Initialize variables for the largest obstacle
             largest_area = 0
             largest_obstacle = None
 
@@ -65,40 +48,44 @@ def process_frames():
                     largest_area = area
                     largest_obstacle = contour
 
+            # Find the center of the image
+            height, width, _ = color_image.shape
+            center_of_image_x = width // 2
+            center_of_image_y = height // 2
+
             if largest_obstacle is not None:
-                # Calculate the center of the largest obstacle
                 x, y, w, h = cv2.boundingRect(largest_obstacle)
-                center_x = x + w // 2 - color_image.shape[1] // 2
-                center_y = y + h // 2 - color_image.shape[0] // 2
+                center_x = x + w // 2
+                center_y = y + h // 2
 
-                # Get the depth value at the center of the obstacle
-                depth_value = depth_frame.get_distance(x + w // 2, y + h // 2)
+                # Adjusting to make the center of the image (0, 0)
+                adjusted_center_x = center_x - center_of_image_x
+                adjusted_center_y = center_y - center_of_image_y
 
-                # Print the adjusted x, y, and z coordinates of the center
-                #print(f"X: {center_x}, Y: {center_y}, Z: {depth_value}")
+                depth_value = depth_frame.get_distance(center_x, center_y)
 
-                # Draw the largest contour on the color image
-                cv2.drawContours(color_image, [largest_obstacle], -1, (0, 0, 255), 2)
+                cv2.drawContours(color_image, [largest_obstacle], -1, (0, 255, 0), 3)  # Draw contour in green for visibility
 
+                # Yield the adjusted center coordinates and depth
+                yield adjusted_center_x, adjusted_center_y, depth_value
             else:
-                # No obstacle detected, set coordinates to (0,0,0)
-                #print("X: 0, Y: 0, Z: 0")
-                x=y=z=0
+                # Yield (0, 0, 0) if no red object is detected
+                yield 0, 0, 0
 
-            # Display the color image with the red contours
-            cv2.imshow("Color Frame with Red Contours", color_image)
+            # Display the video feed with contours
+            cv2.imshow('RealSense Color Feed', color_image)
 
+            await asyncio.sleep(0.01)
             key = cv2.waitKey(1)
-            if key == 27:  # Press 'Esc' to exit
+            if key == 27:  # 'Esc' key to exit
                 break
 
     except Exception as e:
         print(f"An error occurred: {e}")
 
     finally:
-        # Stop the pipeline
         pipeline.stop()
         cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    process_frames()
+    asyncio.run(process_frames())

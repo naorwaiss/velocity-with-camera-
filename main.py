@@ -2,6 +2,7 @@ import asyncio
 from camera import process_frames  # Import the process_frames function from the main script
 from mavsdk import System
 from mavsdk.offboard import (OffboardError, VelocityBodyYawspeed)
+import time
 
 
 async def takeoff_presedoure(drone,target_altitude):
@@ -39,18 +40,20 @@ async def offboard(drone):
 
 
 
-async def camera_motion(drone):
-    async for x, y, z in process_frames():
-        await drone.offboard.set_velocity_body(
-            VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
-        while True:
-            # Move at x
-            if x > 5:
-                await drone.offboard.set_velocity_body(
-                    VelocityBodyYawspeed(1.0, 0.0, 0.0, 0.0))
+async def camera_motion(drone, x, y, z, timeout=10):
+    start_time = time.time()
+    print(x)
+    await drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
+    while time.time() - start_time < timeout:
+        if x > 5:
+            await drone.offboard.set_velocity_body(VelocityBodyYawspeed(1.0, 0.0, 0.0, 0.0))
+        elif x <5 :
+            await drone.offboard.set_velocity_body(VelocityBodyYawspeed(-1.0, 0.0, 0.0, 0.0))
 
-            else:
-                print ("hold")
+        else:
+            print("Hold")
+            await asyncio.sleep(0.5)  # Add a small delay to prevent flooding the console
+    print("Exiting camera_motion")
 
 
 
@@ -66,21 +69,22 @@ async def main():
             print(f"-- Connected to drone!")
             break
 
+    target_altitude = int(input("what is the drone first altitude:"))
+    await takeoff_presedoure(drone,target_altitude)
 
+    try:
+        async for x, y, z in process_frames():
+            print(f"Received coordinates: {x}, {y}, {z}")
+            await camera_motion(drone, x, y, z, timeout=10)
+            print("Completed a camera_motion cycle")
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
-
-    first_atitude = int(input("enter the first altitude of the drone at [M]:"))
-    await takeoff_presedoure(drone,first_atitude)
-
-    await camera_motion(drone)
-
-
-
-    #async for x, y, z in process_frames():
-        #print(f"x_distance: {x}, y_distance: {y}, depth: {z:.2f} meters")
-
-if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
-
-
+    if __name__ == "__main__":
+        try:
+            loop = asyncio.get_event_loop()
+            loop.run_until_complete(main())
+        except KeyboardInterrupt:
+            print("Script manually interrupted")
+        except Exception as e:
+            print(f"Unhandled error: {e}")
