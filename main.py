@@ -37,21 +37,6 @@ async def offboard(drone):
     return
 
 
-async def offboard(drone):
-
-    try:
-        await drone.offboard.start()
-    except OffboardError as error:
-        print(f"Starting offboard mode failed with error code: \
-                  {error._result.result}")
-
-        print("stop offbord")
-        await drone.offboard.stop()
-        return
-
-    return
-
-
 
 
 async def camera_motion(drone):
@@ -97,6 +82,5 @@ async def main():
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main())
-
 
 
