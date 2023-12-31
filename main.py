@@ -41,23 +41,29 @@ async def offboard(drone):
 
 
 async def camera_motion(drone, x, y, z):
-    start_time = time.time()
+    print(f"Received camera data: x={x}, y={y}, z={z}")
     await drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
-    if x > 5:
-            await drone.offboard.set_velocity_body(VelocityBodyYawspeed(1.0, 0.0, 0.0, 0.0))
-    elif x <5 :
-            await drone.offboard.set_velocity_body(VelocityBodyYawspeed(-1.0, 0.0, 0.0, 0.0))
+    await offboard(drone)
+    factor = 0.01
+    if x > 10:
+            await drone.offboard.set_velocity_body(VelocityBodyYawspeed(5.0, 0.0, 0.0, 0.0))
+    elif x < -10 :
+            await drone.offboard.set_velocity_body(VelocityBodyYawspeed(-5.0, 0.0, 0.0, 0.0))
+    elif y < 10:
+        await drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 5.0, 0.0, 0.0))
+    elif y < -10:
+        await drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, -5.0, 0.0, 0.0))
 
     else:
             print("Hold")
-            await asyncio.sleep(0.5)  # Add a small delay to prevent flooding the console
-    print("Exiting camera_motion")
+
 
 
 
 
 
 async def main():
+    global x,y,z
     drone = System()
     await drone.connect(system_address="udp://:14540")
 
@@ -87,7 +93,7 @@ async def main():
             # Get camera data from the queue
             x, y, z = await camera_data_queue.get()
             await camera_motion(drone,x,y,z)
-            print(f"Received camera data: x={x}, y={y}, z={z}")
+
 
 
     except asyncio.CancelledError:

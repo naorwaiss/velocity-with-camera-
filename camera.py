@@ -10,6 +10,10 @@ async def process_frames(queue):
     config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
     pipeline.start(config)
 
+    # Open a video window
+    cv2.namedWindow("Video Stream", cv2.WINDOW_NORMAL)
+    cv2.resizeWindow("Video Stream", 640, 480)
+
     try:
         while True:
             frames = await asyncio.to_thread(pipeline.wait_for_frames)
@@ -46,15 +50,23 @@ async def process_frames(queue):
                     largest_obstacle = contour
 
             if largest_obstacle is not None:
-                x, y, w, h = cv2.boundingRect(largest_obstacle)
-                center_x = x + w // 2
-                center_y = y + h // 2
-                depth_value = depth_frame.get_distance(center_x, center_y)
+                # Calculate x, y, z coordinates from the center of the largest red object
+                M = cv2.moments(largest_obstacle)
+                if M["m00"] != 0:
+                    center_x = int(M["m10"] / M["m00"])
+                    center_y = int(M["m01"] / M["m00"])
+                    depth_value = depth_frame.get_distance(center_x, center_y)
 
-                cv2.drawContours(color_image, [largest_obstacle], -1, (0, 0, 255), 2)
+                    # Mark the center of all pixels belonging to the red object
+                    cv2.drawContours(color_image, [largest_obstacle], -1, (0, 0, 255), 2)
+                    cv2.circle(color_image, (center_x, center_y), 5, (0, 255, 0), -1)
 
-                # Put the x, y, z coordinates into the queue
-                await queue.put((center_x, center_y, depth_value))
+                    # Put the x, y, z coordinates into the queue
+                    await queue.put((center_x, center_y, depth_value))
+
+            cv2.imshow("Video Stream", color_image)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
 
             await asyncio.sleep(0.01)
 
@@ -63,3 +75,15 @@ async def process_frames(queue):
 
     finally:
         pipeline.stop()
+        cv2.destroyAllWindows()
+
+if __name__ == "__main__":
+    loop = asyncio.get_event_loop()
+    queue = asyncio.Queue()
+
+    try:
+        loop.run_until_complete(process_frames(queue))
+    except KeyboardInterrupt:
+        pass
+    finally:
+        loop.close()
