@@ -1,12 +1,9 @@
-import os
-import pyrealsense2.pyrealsense2 as rs
-import numpy as np
-import cv2
 import asyncio
+import cv2
+import numpy as np
+import pyrealsense2.pyrealsense2 as rs
 
-os.environ["DISPLAY"] = ":0.0"
-
-async def process_frames():
+async def process_frames(queue):
     pipeline = rs.pipeline()
     config = rs.config()
     config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
@@ -48,44 +45,21 @@ async def process_frames():
                     largest_area = area
                     largest_obstacle = contour
 
-            # Find the center of the image
-            height, width, _ = color_image.shape
-            center_of_image_x = width // 2
-            center_of_image_y = height // 2
-
             if largest_obstacle is not None:
                 x, y, w, h = cv2.boundingRect(largest_obstacle)
                 center_x = x + w // 2
                 center_y = y + h // 2
-
-                # Adjusting to make the center of the image (0, 0)
-                adjusted_center_x = center_x - center_of_image_x
-                adjusted_center_y = center_y - center_of_image_y
-
                 depth_value = depth_frame.get_distance(center_x, center_y)
 
-                cv2.drawContours(color_image, [largest_obstacle], -1, (0, 255, 0), 3)  # Draw contour in green for visibility
+                cv2.drawContours(color_image, [largest_obstacle], -1, (0, 0, 255), 2)
 
-                # Yield the adjusted center coordinates and depth
-                yield adjusted_center_x, adjusted_center_y, depth_value
-            else:
-                # Yield (0, 0, 0) if no red object is detected
-                yield 0, 0, 0
-
-            # Display the video feed with contours
-            cv2.imshow('RealSense Color Feed', color_image)
+                # Put the x, y, z coordinates into the queue
+                await queue.put((center_x, center_y, depth_value))
 
             await asyncio.sleep(0.01)
-            key = cv2.waitKey(1)
-            if key == 27:  # 'Esc' key to exit
-                break
 
     except Exception as e:
         print(f"An error occurred: {e}")
 
     finally:
         pipeline.stop()
-        cv2.destroyAllWindows()
-
-if __name__ == "__main__":
-    asyncio.run(process_frames())

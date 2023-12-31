@@ -40,17 +40,15 @@ async def offboard(drone):
 
 
 
-async def camera_motion(drone, x, y, z, timeout=10):
+async def camera_motion(drone, x, y, z):
     start_time = time.time()
-    print(x)
     await drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
-    while time.time() - start_time < timeout:
-        if x > 5:
+    if x > 5:
             await drone.offboard.set_velocity_body(VelocityBodyYawspeed(1.0, 0.0, 0.0, 0.0))
-        elif x <5 :
+    elif x <5 :
             await drone.offboard.set_velocity_body(VelocityBodyYawspeed(-1.0, 0.0, 0.0, 0.0))
 
-        else:
+    else:
             print("Hold")
             await asyncio.sleep(0.5)  # Add a small delay to prevent flooding the console
     print("Exiting camera_motion")
@@ -70,21 +68,41 @@ async def main():
             break
 
     target_altitude = int(input("what is the drone first altitude:"))
-    await takeoff_presedoure(drone,target_altitude)
+    await takeoff_presedoure(drone, target_altitude)
+
+
+
+
+#here start the camera
+
+
+    # Set up a queue for camera data
+    camera_data_queue = asyncio.Queue()
+
+    # Start process_frames as a background task
+    camera_task = asyncio.create_task(process_frames(camera_data_queue))
 
     try:
-        async for x, y, z in process_frames():
-            print(f"Received coordinates: {x}, {y}, {z}")
-            await camera_motion(drone, x, y, z, timeout=10)
-            print("Completed a camera_motion cycle")
+        while True:
+            # Get camera data from the queue
+            x, y, z = await camera_data_queue.get()
+            await camera_motion(drone,x,y,z)
+            print(f"Received camera data: x={x}, y={y}, z={z}")
+
+
+    except asyncio.CancelledError:
+        # This block will execute when camera_task is cancelled
+        pass
     except Exception as e:
         print(f"An error occurred: {e}")
+    finally:
+        camera_task.cancel()  # Cancel the background task on exit
 
-    if __name__ == "__main__":
-        try:
-            loop = asyncio.get_event_loop()
-            loop.run_until_complete(main())
-        except KeyboardInterrupt:
-            print("Script manually interrupted")
-        except Exception as e:
-            print(f"Unhandled error: {e}")
+if __name__ == "__main__":
+    try:
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(main())
+    except KeyboardInterrupt:
+        print("Script manually interrupted")
+    except Exception as e:
+        print(f"Unhandled error: {e}")
