@@ -1,3 +1,6 @@
+
+# check only the camera fonctionalaty
+
 import asyncio
 from camera import process_frames  # Make sure this is the correct path to your file
 

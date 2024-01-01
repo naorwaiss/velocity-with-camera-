@@ -15,10 +15,11 @@ async def process_frames(queue):
     pipeline.start(config)
 
     # Set up the path for video saving
-    desktop_path = '/home/naor/Desktop'
+
+    desktop_path = '/home/naor/Desktop'   #change this line to the jetson
     video_path = os.path.join(desktop_path, 'output.avi')
 
-    # Open a video window
+    # Open a video window - need to check if it work at the jeton
     cv2.namedWindow("Video Stream", cv2.WINDOW_NORMAL)
     cv2.resizeWindow("Video Stream", 640, 480)
 
@@ -44,6 +45,8 @@ async def process_frames(queue):
             upper_red1 = np.array([10, 255, 255])
             lower_red2 = np.array([160, 100, 100])
             upper_red2 = np.array([180, 255, 255])
+
+            cv2.circle(color_image, (320, 240), 5, (255, 0, 0), -1)  # Blue color in BGR format
 
             # Threshold the HSV image to get only red colors
             mask1 = cv2.inRange(hsv, lower_red1, upper_red1)

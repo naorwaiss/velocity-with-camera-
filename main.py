@@ -38,30 +38,22 @@ async def offboard(drone):
     return
 
 
-
-
 async def camera_motion(drone, x, y, z):
     print(f"Received camera data: x={x}, y={y}, z={z}")
     await drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
     await offboard(drone)
     factor = 0.01
 
-    # need to change
-    if x > 10:
-            await drone.offboard.set_velocity_body(VelocityBodyYawspeed(5.0, 0.0, 0.0, 0.0))
-    elif x < -10 :
-            await drone.offboard.set_velocity_body(VelocityBodyYawspeed(-5.0, 0.0, 0.0, 0.0))
-    elif y < 10:
-        await drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 5.0, 0.0, 0.0))
-    elif y < -10:
-        await drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, -5.0, 0.0, 0.0))
+    x_factor = x * factor
+    y_factor = y * factor
 
+    velocity_command = VelocityBodyYawspeed(x_factor, y_factor, 0.0, 0.0)
+
+    if x_factor > 0.1 or y_factor > 0.1:
+        await drone.offboard.set_velocity_body(velocity_command)
     else:
-            print("Hold")
-
-
-
-
+        await asyncio.sleep(0.5)
+        print("hold")
 
 
 async def main():
