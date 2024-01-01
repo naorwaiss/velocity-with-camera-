@@ -1,11 +1,24 @@
 import asyncio
-import os
-from camera import process_frames  # Ensure camera.py is in the same directory or adjust the import path accordingly
+from camera import process_frames  # Make sure this is the correct path to your file
 
-async def main():
+async def print_coordinates():
+    queue = asyncio.Queue()
+    frame_processor_task = asyncio.create_task(process_frames(queue))  # Start processing frames in a separate task
 
-    async for x, y, z in process_frames():
-        print(f"X: {x}, Y: {y}, Z: {z}")
+    try:
+        while True:
+            x, y, z = await queue.get()  # Get x, y, z values from the queue
+            print(f"Coordinates: X={x}, Y={y}, Z={z}")  # Print the coordinates
+    except asyncio.CancelledError:
+        pass  # Handle cancellation of the task
+    finally:
+        frame_processor_task.cancel()  # Ensure the frame processing task is cancelled when done
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    loop = asyncio.get_event_loop()
+    try:
+        loop.run_until_complete(print_coordinates())
+    except KeyboardInterrupt:
+        pass
+    finally:
+        loop.close()

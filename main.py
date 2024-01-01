@@ -45,6 +45,8 @@ async def camera_motion(drone, x, y, z):
     await drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
     await offboard(drone)
     factor = 0.01
+
+    # need to change
     if x > 10:
             await drone.offboard.set_velocity_body(VelocityBodyYawspeed(5.0, 0.0, 0.0, 0.0))
     elif x < -10 :
@@ -92,6 +94,7 @@ async def main():
         while True:
             # Get camera data from the queue
             x, y, z = await camera_data_queue.get()
+            print (x,y,z)
             await camera_motion(drone,x,y,z)
 
 
