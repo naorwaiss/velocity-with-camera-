@@ -4,6 +4,9 @@ import numpy as np
 import pyrealsense2.pyrealsense2 as rs
 import os
 
+
+#os.environ["DISPLAY"] = ":0.0" #need add only at the jetson
+
 async def process_frames(queue):
     pipeline = rs.pipeline()
     config = rs.config()
@@ -16,7 +19,8 @@ async def process_frames(queue):
 
     # Set up the path for video saving
 
-    desktop_path = '/home/naor/Desktop'   #change this line to the jetson
+    #desktop_path = '/home/naor/Desktop'   #change this line to the jetson
+    desktop_path = '/home/drone/Desktop'
     video_path = os.path.join(desktop_path, 'output.avi')
 
     # Open a video window - need to check if it work at the jeton
@@ -87,6 +91,9 @@ async def process_frames(queue):
 
                     # Put the adjusted coordinates into the queue
                     await queue.put((adjusted_x, adjusted_y, depth_value))
+
+                else:
+                    await queue.put((0, 0, 0))
 
             # Show the image
             cv2.imshow("Video Stream", color_image)

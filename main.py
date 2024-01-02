@@ -47,7 +47,7 @@ async def camera_motion(drone, x, y, z):
     x_factor = x * factor
     y_factor = y * factor
 
-    velocity_command = VelocityBodyYawspeed(x_factor, y_factor, 0.0, 0.0)
+    velocity_command = VelocityBodyYawspeed(y_factor, x_factor, 0.0, 0.0)
 
     if x_factor > 0.1 or y_factor > 0.1:
         await drone.offboard.set_velocity_body(velocity_command)
@@ -59,7 +59,8 @@ async def camera_motion(drone, x, y, z):
 async def main():
     global x,y,z
     drone = System()
-    await drone.connect(system_address="udp://:14540")
+    #await drone.connect(system_address="udp://:14540")
+    await drone.connect(system_address="serial:///dev/ttyTHS1")
 
     print("Waiting for drone to connect...")
     async for state in drone.core.connection_state():
