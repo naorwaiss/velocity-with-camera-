@@ -1,1 +1,12 @@
-need to make here some order 
+the camera code is ready it bring the x,y,z at pixel and m
+
+need to make
+code
+1) function the convert with the fov to [m] the x,y - done
+2) function to stop the loop
+3) pid controller
+
+jetson --
+1) make the new jetson to know pyrealsense
+2)
+
