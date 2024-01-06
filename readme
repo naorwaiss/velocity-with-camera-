@@ -3,6 +3,7 @@ the camera code is ready it bring the x,y,z at pixel and m
 need to make
 code
 1) function the convert with the fov to [m] the x,y - done
+3) make some code the doing mesh when i get pixel and depth
 2) function to stop the loop
 3) pid controller
 
