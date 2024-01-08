@@ -65,7 +65,6 @@ async def takeoff_velocity(drone):
 
 
 async def camera_motion_simple(drone, x, y, z):
-    print(f"Received camera data: x={x}, y={y}, z={z}")
     await drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
     await offboard(drone)
     factor = 0.01

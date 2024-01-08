@@ -4,6 +4,8 @@ import numpy as np
 import pyrealsense2.pyrealsense2 as rs
 import os
 import math
+from filterpy.kalman import KalmanFilter
+
 # this code is finish
 # At the Jetson, if the code runs from the console -- need: import pyrealsense2 as rs
 
@@ -35,6 +37,29 @@ async def pixel_to_meters(x_pixel, y_pixel, fov_horizontal, fov_vertical, image_
     y_meters = math.tan(angle_offset_y_radians) * distance_to_object
 
     return x_meters, y_meters
+
+
+def initialize_kalman_filter():
+    # Create a new Kalman Filter instance
+    kf = KalmanFilter(dim_x=2, dim_z=2)  # Assuming 2D coordinates (x, y)
+
+    # Configure the Kalman filter parameters
+    kf.F = np.array([[1, 0], [0, 1]])  # State transition matrix
+    kf.H = np.array([[1, 0], [0, 1]])  # Measurement function
+    kf.R = np.eye(2) * 0.1             # Measurement uncertainty
+    kf.Q = np.eye(2) * 0.1             # Process noise
+    kf.P = np.eye(2) * 1               # Initial estimation uncertainty
+
+    return kf
+
+def update_kalman_filter(kf, x_n, y_n):
+    kf.predict()  # Predict the next state
+    kf.update([x_n, y_n])  # Update with the new measurements
+
+    filtered_x, filtered_y = kf.x[0], kf.x[1]
+    return filtered_x, filtered_y
+
+
 
 
 
