@@ -2,12 +2,19 @@ the camera code is ready it bring the x,y,z at pixel and m
 
 need to make
 code
-1) function the convert with the fov to [m] the x,y - done
+1) at the pid function need to test the direction and the code
 3) make some code the doing mesh when i get pixel and depth
 2) function to stop the loop
-3) pid controller
+4) check if need to gave await time
+5) function
 
 jetson --
-1) make the new jetson to know pyrealsense
-2)
+1) check if the jetson is get the pyrealsense - the new one
+
+
+
+drone --
+1)check if the drone can get hold
+2) doing some pid configuration - auto tune
+3) print camera holder
 

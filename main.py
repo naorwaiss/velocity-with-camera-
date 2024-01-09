@@ -3,9 +3,11 @@ from camera import process_frames, pixel_to_meters, update_kalman_filter, initia
 from mavsdk import System
 from mavsdk.offboard import OffboardError, VelocityBodyYawspeed
 import time
-from drone_mothion_function import offboard, takeoff_velocity, camera_motion_simple, takeoff_presedoure
+from drone_mothion_function import offboard, takeoff_velocity, camera_motion_simple, takeoff_presedoure,camera_motion_PID
 
 async def check_camera_work(drone, camera_data_queue, timeout_duration):
+    # this function not work
+
     try:
         # Wait for an indication that the camera is ready
         await asyncio.wait_for(camera_data_queue.get(), timeout=timeout_duration)
@@ -22,6 +24,7 @@ async def camera_manipulation(x, y, z, kf):
     return filtered_x, filtered_y
 
 async def main():
+    # this is the main branch of the drone code
     drone = System()
     await drone.connect(system_address="udp://:14540")
 
@@ -34,6 +37,7 @@ async def main():
     await drone.action.hold()
     await takeoff_velocity(drone)  # Doing takeoff to 5-4 meters without GPS
 
+    filtered_x_prev= filtered_y_prev=0
     camera_data_queue = asyncio.Queue()
     camera_task = asyncio.create_task(process_frames(camera_data_queue))
     print("Start camera processing")
@@ -52,10 +56,19 @@ async def main():
 
             x, y, z = await camera_data_queue.get()
             filtered_x, filtered_y = await camera_manipulation(x, y, z, kf)
-            print(f"Received camera data: x={filtered_x}, y={filtered_x}, z={z}")
+
+            print(f"Received camera data: x={x}, y={x}, z={z}")
 
 
-            await camera_motion_simple(drone, x, y, z)
+            #start the camera movment
+            await drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
+            await offboard(drone)
+            await camera_motion_PID(x,y,filtered_x,filtered_y,filtered_x_prev,filtered_y_prev,z,elapsed,drone)
+            #need to check the code
+            #stop the camera movment
+
+            filtered_x_prev = filtered_x
+            filtered_y_prev = filtered_y
 
     except asyncio.CancelledError:
         pass
