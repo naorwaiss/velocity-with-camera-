@@ -2,7 +2,6 @@ the camera code is ready it bring the x,y,z at pixel and m
 
 need to make
 code
-1) at the pid function need to test the direction and the code
 2) function to stop the loop
 5) need to gave some validation - if the drone is at some x,y (pixel and distance ) the drone need to move at some direction
 

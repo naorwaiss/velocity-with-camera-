@@ -4,7 +4,7 @@ import math
 import numpy as np
 from filterpy.kalman import KalmanFilter
 from camera import process_frames  # Make sure this is the correct path to your camera module
-from drone_mothion_function import camera_motion_PID
+from drone_mothion_function import movment_camera
 
 def initialize_kalman_filter():
     # Create a new Kalman Filter instance - need to learn it little bit more deep becuse this is right now like black box
@@ -68,11 +68,11 @@ async def print_coordinates():
 
             #the function is ready  for the drone
             #Vx,Vy = await camera_motion_PID(x,y,filtered_x,filtered_y,filtered_x_prev,filtered_y_prev,z,elapsed)
-            filtered_x_prev = filtered_x
-            filtered_y_prev = filtered_y
 
-            hertz = 1 / elapsed
-            print(f"Time elapsed: {hertz:.2f} hertz, speed value : Vx={Vx}, Vy={Vy}, Z={z}")
+            await movment_camera(filtered_x, filtered_y,x,y,z)
+
+
+
 
     except asyncio.CancelledError:
         pass

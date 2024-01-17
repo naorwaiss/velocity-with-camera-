@@ -3,7 +3,7 @@ from camera import process_frames, pixel_to_meters, update_kalman_filter, initia
 from mavsdk import System
 from mavsdk.offboard import OffboardError, VelocityBodyYawspeed
 import time
-from drone_mothion_function import offboard, takeoff_velocity, camera_motion_simple, takeoff_presedoure,camera_motion_PID
+from drone_mothion_function import offboard, takeoff_velocity, camera_motion_simple, takeoff_presedoure,movment_camera
 
 async def check_camera_work(drone, camera_data_queue, timeout_duration):
     # this function not work
@@ -37,7 +37,6 @@ async def main():
     await drone.action.hold()
     await takeoff_velocity(drone)  # Doing takeoff to 5-4 meters without GPS
 
-    filtered_x_prev= filtered_y_prev=0
     camera_data_queue = asyncio.Queue()
     camera_task = asyncio.create_task(process_frames(camera_data_queue))
     print("Start camera processing")
@@ -63,16 +62,10 @@ async def main():
             #start the camera movment
             await drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
             await offboard(drone)
-            await camera_motion_PID(x,y,filtered_x,filtered_y,filtered_x_prev,filtered_y_prev,z,elapsed,drone)
+            await movment_camera(drone,filtered_x,filtered_y,x,y,z)
+            # here is the main function
 
 
-            #stop the camera movment (need to wirte it )
-
-
-
-
-            filtered_x_prev = filtered_x
-            filtered_y_prev = filtered_y
 
     except asyncio.CancelledError:
         pass
