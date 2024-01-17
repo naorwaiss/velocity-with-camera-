@@ -109,6 +109,30 @@ async def sighn(value):
 
 
 
+async def move_pliz_lazy_bitch(V,pixel,z):
+    flag = 0 # if the flag= 1 the drone can move at the z value (the move come at the main function)
+    if (pixel<70 or z<0.3):
+        return V,flag        #simple ditection movement
+
+    elif (pixel<30 and V<0.1 ):
+        print ("can change the z value ")
+        flag = 1
+        V = 0
+        return V,flag
+    elif (pixel>100 and V<0.1 and z>0.3):
+        V = 0.2  #start to move at slow to center the object
+        return V,flag
+
+
+
+
+
+    # if x is between somthin and y and z is less grate then 0.5 and need to check the speed olso
+
+
+
+    return
+
 
 async def camera_motion_PID(x,y,filtered_x, filtered_y,filtered_x_prev, filtered_y_prev,z,eleps,drone):
 
@@ -117,7 +141,7 @@ async def camera_motion_PID(x,y,filtered_x, filtered_y,filtered_x_prev, filtered
     Vy = abs((filtered_y - filtered_y_prev) / eleps)
     if (z==0):
         Vx=Vy=0
-        return Vx,Vy
+        return
 
     elif (Vx >3 or Vy >3):
         print("high velo - prolem- stop the drone movment at this iteration ")
@@ -128,12 +152,14 @@ async def camera_motion_PID(x,y,filtered_x, filtered_y,filtered_x_prev, filtered
         #doing some calculation
         Vx = Vx * (await factor(x))*(await sighn(x))
         Vy = Vy * (await factor(y))*(await sighn(y))
-
-        #need to find out if the direction - and change the factor as well
-
         velocity_command = VelocityBodyYawspeed(Vy, Vx, 0.0, 0.0)
         await drone.offboard.set_velocity_body(velocity_command)
-        #await asyncio.sleep(0.2) this things is needed?
+
+        #check the movment direction with the x,y and Vx, Vy
+        print(f" speed: Vx={Vx}, Vy={Vy}, z={z}")
+        print (f"camera location: x={x},y={y},z={z}")
+
+        await asyncio.sleep(0.1) #this things is needed?
     return
 
 

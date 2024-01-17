@@ -3,10 +3,8 @@ the camera code is ready it bring the x,y,z at pixel and m
 need to make
 code
 1) at the pid function need to test the direction and the code
-3) make some code the doing mesh when i get pixel and depth
 2) function to stop the loop
-4) check if need to gave await time
-5) function
+5) need to gave some validation - if the drone is at some x,y (pixel and distance ) the drone need to move at some direction
 
 jetson --
 1) check if the jetson is get the pyrealsense - the new one

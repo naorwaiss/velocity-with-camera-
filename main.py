@@ -57,15 +57,19 @@ async def main():
             x, y, z = await camera_data_queue.get()
             filtered_x, filtered_y = await camera_manipulation(x, y, z, kf)
 
-            print(f"Received camera data: x={x}, y={x}, z={z}")
+
 
 
             #start the camera movment
             await drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
             await offboard(drone)
             await camera_motion_PID(x,y,filtered_x,filtered_y,filtered_x_prev,filtered_y_prev,z,elapsed,drone)
-            #need to check the code
-            #stop the camera movment
+
+
+            #stop the camera movment (need to wirte it )
+
+
+
 
             filtered_x_prev = filtered_x
             filtered_y_prev = filtered_y
