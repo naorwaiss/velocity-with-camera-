@@ -129,3 +129,7 @@ async def movment_camera(drone,filtered_x, filtered_y,x,y,z):
     print(f" speed: Vx={Vx}, Vy={Vy}, z={z}")
 
 
+async def odomety(drone):
+    #this function gave me the velocity at the single time - this function is work
+    async for odometry in drone.telemetry.odometry():
+        return odometry.velocity_body.x_m_s,odometry.velocity_body.y_m_s,odometry.velocity_body.z_m_s
