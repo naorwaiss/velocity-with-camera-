@@ -6,7 +6,12 @@ import math
 
 
 async def offboard(drone):
+    """
 
+    :param drone: drone is the connact string
+    :return: the real/ fake drone need to change the mode to off board mode
+    before this function need to gave the drone some -  "set"
+    """
     try:
         await drone.offboard.start()
     except OffboardError as error:
@@ -42,7 +47,11 @@ async def takeoff_presedoure(drone,target_altitude):
 
 
 async def takeoff_velocity(drone):
-    #only move at the z at the start of the drone
+    """
+
+    :param drone: the connection string
+    :return: this function takeoff the drone at velocity value
+    """
     print("-- Arming")
     await drone.action.arm()
 
@@ -64,22 +73,6 @@ async def takeoff_velocity(drone):
 
 
 
-
-async def camera_motion_simple(drone, x, y, z):
-    #this function is simple motion - this is function need to fix
-
-    factor = 0.01
-
-    x_factor = x * factor
-    y_factor = y * factor
-
-    velocity_command = VelocityBodyYawspeed(y_factor, x_factor, 0.0, 0.0)
-
-    if x_factor > 0.1 or y_factor > 0.1:
-        await drone.offboard.set_velocity_body(velocity_command)
-    else:
-        await drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
-        #at this point the drone need to change the z velocity
 
 
 
@@ -130,6 +123,49 @@ async def movment_camera(drone,filtered_x, filtered_y,x,y,z):
 
 
 async def odomety(drone):
-    #this function gave me the velocity at the single time - this function is work
+    """
+
+    :param drone: connection stroing
+    :return: this function gave a single output for the drone belocity at budy
+    * this function is simple example how to chanfe the for loop to single output - it take me too long time
+    this function is one of the importent function
+    """
+    #need to think if need to vhange this value to somthing that i knew??
     async for odometry in drone.telemetry.odometry():
         return odometry.velocity_body.x_m_s,odometry.velocity_body.y_m_s,odometry.velocity_body.z_m_s
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+async def camera_motion_simple(drone, x, y, z):
+    # simple camera motion that i noot like to delet becuse it show me where i began
+
+    factor = 0.01
+
+    x_factor = x * factor
+    y_factor = y * factor
+
+    velocity_command = VelocityBodyYawspeed(y_factor, x_factor, 0.0, 0.0)
+
+    if x_factor > 0.1 or y_factor > 0.1:
+        await drone.offboard.set_velocity_body(velocity_command)
+    else:
+        await drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
+        #at this point the drone need to change the z velocity

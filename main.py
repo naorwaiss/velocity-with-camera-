@@ -6,7 +6,7 @@ import time
 from drone_mothion_function import offboard, takeoff_velocity, camera_motion_simple, takeoff_presedoure,movment_camera
 
 async def check_camera_work(drone, camera_data_queue, timeout_duration):
-    # this function not work
+    # this function not work - need to fix it
 
     try:
         # Wait for an indication that the camera is ready
@@ -19,12 +19,23 @@ async def check_camera_work(drone, camera_data_queue, timeout_duration):
         return False
 
 async def camera_manipulation(x, y, z, kf):
+    """
+
+    :param x: x value at pixle - the output from the camera
+    :param y:  y value at pixle - the output from the camera
+    :param z:  z  value at maters - the output from the camera
+    :param kf: some first value for the kalman filter
+    :return: the function return the value of the camera after two change:
+    1) move from pixel to meters
+    2) doing kalman filter to tha tdata (need to think if it neccecery)
+
+    """
     x_n, y_n = await pixel_to_meters(x, y, 87, 58, 640, 480, z)
     filtered_x, filtered_y = update_kalman_filter(kf, x_n, y_n)
     return filtered_x, filtered_y
 
 async def main():
-    # this is the main branch of the drone code
+    # this is the main branch of the drone code -
     drone = System()
     await drone.connect(system_address="udp://:14540")
 
@@ -49,6 +60,7 @@ async def main():
         last_time = time.time()
         kf = initialize_kalman_filter()
         while True:
+            #time check - elapsed is the time between the loops - this is importent for the PID
             current_time = time.time()
             elapsed = current_time - last_time
             last_time = current_time
@@ -63,7 +75,8 @@ async def main():
             await drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
             await offboard(drone)
             await movment_camera(drone,filtered_x,filtered_y,x,y,z)
-            # here is the main function
+
+
 
 
 
