@@ -4,7 +4,16 @@ import math
 import numpy as np
 from filterpy.kalman import KalmanFilter
 from camera import process_frames  # Make sure this is the correct path to your camera module
-from drone_mothion_function import movment_camera
+from camera import pixel_to_meters
+from notebook import crate_notepad, save_to_note_pads
+
+
+async def save_data( Vx, Vy, delta_t):
+    await save_to_note_pads(delta_t, 'delta_t.txt')
+    await save_to_note_pads(Vx, 'Vx.txt')
+    await save_to_note_pads(Vx, 'Vy.txt')
+
+
 
 def initialize_kalman_filter():
     # Create a new Kalman Filter instance - need to learn it little bit more deep becuse this is right now like black box
@@ -23,7 +32,7 @@ def update_kalman_filter(kf, x_n, y_n):
     kf.predict()  # Predict the next state
     kf.update([x_n, y_n])  # Update with the new measurements
 
-    filtered_x, filtered_y = kf.x[0], kf.x[1]
+    filtered_x, filtered_y =kf.x[0], kf.x[1]
     return filtered_x, filtered_y
 
 async def pixel_to_meters(x_pixel, y_pixel, fov_horizontal, fov_vertical, image_width, image_height, distance_to_object):
@@ -56,7 +65,7 @@ async def print_coordinates():
     filtered_x_prev = filtered_y_prev = 0
     try:
         last_time = time.time()
-
+        await crate_notepad()  # need to check if the textfile is open ??
         while True:
             current_time = time.time()
             elapsed = current_time - last_time
@@ -65,13 +74,8 @@ async def print_coordinates():
             x, y, z = await queue.get()
             x_n, y_n = await pixel_to_meters(x, y, 87, 58, 640, 480, z)
             filtered_x, filtered_y = update_kalman_filter(kf, x_n, y_n)
-
-            #the function is ready  for the drone
-            #Vx,Vy = await camera_motion_PID(x,y,filtered_x,filtered_y,filtered_x_prev,filtered_y_prev,z,elapsed)
-
-            await movment_camera(filtered_x, filtered_y,x,y,z)
-
-
+            print (filtered_x,filtered_y,elapsed)
+            await save_data(x_n,y_n,elapsed)
 
 
     except asyncio.CancelledError:

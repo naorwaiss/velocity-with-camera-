@@ -4,7 +4,7 @@ from mavsdk import System
 from mavsdk.offboard import OffboardError, VelocityBodyYawspeed
 import time
 from drone_mothion_function import offboard, takeoff_velocity, odomety, takeoff_presedoure,movment_camera
-from test_note import crate_notepad, save_to_note_pads
+from notebook import crate_notepad, save_to_note_pads
 
 async def check_camera_work(drone, camera_data_queue, timeout_duration):
     # this function not work - need to fix it
@@ -91,7 +91,7 @@ async def main():
             await drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
             await offboard(drone)
             Vx,Vy,z = await movment_camera(drone,filtered_x,filtered_y,x,y,z)
-            await save_data(drone,Vx,Vy,z)
+            await save_data(drone,Vx,Vy,elapsed)
 
 
 

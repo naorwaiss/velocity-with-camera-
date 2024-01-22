@@ -17,8 +17,6 @@ async def pixel_to_meters(x_pixel, y_pixel, fov_horizontal, fov_vertical, image_
     # this function is work
 
 
-
-
     # Calculate the angle per pixel for both horizontal and vertical FOVs
     angle_per_pixel_x = fov_horizontal / image_width
     angle_per_pixel_y = fov_vertical / image_height
