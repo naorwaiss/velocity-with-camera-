@@ -1,6 +1,10 @@
 import os
 import pandas as pd
 
+#this function run on the simulation computer or at the jetson
+# i think i can combine it with the plot script
+
+
 def convert_txt_to_excel():
     # Get all .txt files in the current directory
     txt_files = [file for file in os.listdir() if file.endswith('.txt')]

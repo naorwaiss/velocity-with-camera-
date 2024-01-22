@@ -1,6 +1,10 @@
 import paramiko
 import os
 
+#this dunction move the vedio from the jetson to the linux computer
+#need to add at this function - to take olso the exel file that show the flight dynamic (task)
+
+
 def copy_file_from_jetson():
     # Jetson SSH details
     jetson_host = "192.168.0.102"
