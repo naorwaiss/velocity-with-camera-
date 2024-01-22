@@ -3,7 +3,7 @@ from camera import process_frames, pixel_to_meters, update_kalman_filter, initia
 from mavsdk import System
 from mavsdk.offboard import OffboardError, VelocityBodyYawspeed
 import time
-from drone_mothion_function import offboard, takeoff_velocity, camera_motion_simple, takeoff_presedoure,movment_camera
+from drone_mothion_function import offboard, takeoff_velocity, odomety, takeoff_presedoure,movment_camera
 from test_note import crate_notepad, save_to_note_pads
 
 async def check_camera_work(drone, camera_data_queue, timeout_duration):
@@ -32,8 +32,20 @@ async def camera_manipulation(x, y, z, kf):
 
     """
     x_n, y_n = await pixel_to_meters(x, y, 87, 58, 640, 480, z)
-    filtered_x, filtered_y = update_kalman_filter(kf, x_n, y_n)
-    return filtered_x, filtered_y
+    #filtered_x, filtered_y = update_kalman_filter(kf, x_n, y_n) #need to fix the kalman filter - it bring bad value []
+    return x_n,y_n
+
+
+async def save_data(drone,Vx,Vy,delta_t):
+            await save_to_note_pads(delta_t, 'delta_t.txt')
+            await save_to_note_pads(Vx,'Vx.txt')
+            await save_to_note_pads(Vx, 'Vy.txt')
+            Vx_current,Vy_current,Vz_current = await odomety(drone)
+            await save_to_note_pads(Vx_current,'Vx_current.txt')
+            await save_to_note_pads(Vx_current, 'Vy_current.txt')
+
+
+
 
 async def main():
     # this is the main branch of the drone code -
@@ -79,9 +91,7 @@ async def main():
             await drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
             await offboard(drone)
             Vx,Vy,z = await movment_camera(drone,filtered_x,filtered_y,x,y,z)
-
-
-
+            await save_data(drone,Vx,Vy,z)
 
 
 

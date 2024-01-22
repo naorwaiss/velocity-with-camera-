@@ -40,7 +40,7 @@ async def pixel_to_meters(x_pixel, y_pixel, fov_horizontal, fov_vertical, image_
 
 
 def initialize_kalman_filter():
-    # Create a new Kalman Filter instance
+    # need to fix this function
     kf = KalmanFilter(dim_x=2, dim_z=2)  # Assuming 2D coordinates (x, y)
 
     # Configure the Kalman filter parameters
@@ -53,15 +53,12 @@ def initialize_kalman_filter():
     return kf
 
 def update_kalman_filter(kf, x_n, y_n):
+    #need to fix this function --- it retrun the movment value at [] i need it at int
     kf.predict()  # Predict the next state
     kf.update([x_n, y_n])  # Update with the new measurements
 
-    filtered_x, filtered_y = kf.x[0], kf.x[1]
+    filtered_x, filtered_y = (kf.x[0]),(kf.x[1])
     return filtered_x, filtered_y
-
-
-
-
 
 
 async def process_frames(queue):

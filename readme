@@ -139,6 +139,12 @@ Sudo mavproxy.py –master=/dev/ttyTHS1
 pip install pyzbar
 pip install opencv-python-headless
 
+
+instalation for the data:
+pip install aiofiles
+
+
+
 -----------------------------------------------------
 
 # run simulation
