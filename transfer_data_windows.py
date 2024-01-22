@@ -1,11 +1,13 @@
 import paramiko
 import os
 
-
 def transfer_files(hostname, username, password, local_files, remote_directory):
     # Create an SSH client
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+    # Initialize sftp outside the try block
+    sftp = None
 
     try:
         # Connect to the Linux machine
@@ -16,11 +18,10 @@ def transfer_files(hostname, username, password, local_files, remote_directory):
 
         # Transfer each file
         for local_file in local_files:
-            local_path = os.path.abspath(local_file)
-            remote_path = os.path.join(remote_directory, os.path.basename(local_file))
-
-            print(f"Transferring {local_path} to {remote_path}")
-            sftp.put(local_path, remote_path)
+            # Use forward slash (/) as path separator for Linux paths
+            local_file_linux = local_file.replace('\\', '/')
+            print(f"Transferring {local_file_linux} to {remote_directory}")
+            sftp.put(local_file_linux, os.path.join(remote_directory, os.path.basename(local_file_linux)))
 
         print("File transfer completed successfully!")
 
@@ -29,21 +30,26 @@ def transfer_files(hostname, username, password, local_files, remote_directory):
 
     finally:
         # Close the SFTP session and the SSH connection
-        if sftp:
+        if sftp is not None:
             sftp.close()
         ssh.close()
-
 
 # Replace these values with your own
 linux_hostname = '192.168.1.121'
 linux_username = 'naor'
 linux_password = '1'
 
-# List of local files to transfer
-local_files_to_transfer = ['delta_t.txt', 'Vx.txt', 'Vy.txt', 'Vx_current.txt', 'Vy_current.txt']
+# List of local files to transfer with absolute paths on Linux
+linux_local_files_to_transfer = [
+    '/home/naor/fhsbs/velocity-with-camera-/delta_t.txt',
+    '/home/naor/fhsbs/velocity-with-camera-/Vx.txt',
+    '/home/naor/fhsbs/velocity-with-camera-/Vy.txt',
+    '/home/naor/fhsbs/velocity-with-camera-/Vx_current.txt',
+    '/home/naor/fhsbs/velocity-with-camera-/Vy_current.txt',
+]
 
 # Remote directory on the Windows machine
-windows_remote_directory = 'C:/Path/To/Your/Windows/Directory/'
+windows_remote_directory = r'C:\Users\naorw\OneDrive\שולחן העבודה\proj'
 
 # Perform the file transfer
-transfer_files(linux_hostname, linux_username, linux_password, local_files_to_transfer, windows_remote_directory)
+transfer_files(linux_hostname, linux_username, linux_password, linux_local_files_to_transfer, windows_remote_directory)
