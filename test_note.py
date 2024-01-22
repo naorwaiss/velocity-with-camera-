@@ -1,55 +1,73 @@
 import aiofiles
 import asyncio
-import pandas as pd
 import random
 import os
 
-
-#this function is make my some first information about how to save file - this  be goot to learn how the drone behave
-#need to connact the script to the main script --- need to think how to do his
-
+# Function to create a new notepad (file) with the specified content
 async def create_notepad(file_path, content):
     async with aiofiles.open(file_path, 'w') as file:
         await file.write(content)
 
-
+# Function to append content to an existing notepad (file)
 async def append_to_notepad(file_path, content):
     async with aiofiles.open(file_path, 'a') as file:
         await file.write(content)
 
+# Function to save velocity data to a notepad, either by creating a new notepad or appending to an existing one
+async def save_velocity_data(file_path, velocity_data):
+    # Format the velocity data to have 4 decimal places
+    formatted_data = [format_number(V) for V in velocity_data]
 
-async def save_velocity_data(file_path, time, vx, vy, vz):
-    data = pd.DataFrame({'Time': time, 'Vx': vx, 'Vy': vy, 'Vz': vz})
-    table_string = data.to_string(index=False) + '\n\n'
+    # Convert the list of velocity data to a string with newline separators
+    table_string = '\n'.join(map(str, formatted_data)) + '\n'
 
-    # Remove the existing file, if it exists
+    # If the file exists, append to it; otherwise, create a new notepad
     if os.path.exists(file_path):
-        os.remove(file_path)
+        await append_to_notepad(file_path, table_string)
+    else:
+        await create_notepad(file_path, table_string)
 
-    # Create a new notepad
-    await create_notepad(file_path, table_string)
+# Function to save velocity data to a notepad (file) with a list of velocity values
+
+
+# Function to format a number with 4 decimal places
+def format_number(num):
+    return "{:.4f}".format(num)
+
+
+
+async def crate_notepad():
+    notepad_path1 = 'delta_t.txt'
+    notepad_path2= 'Vy.txt'
+    notepad_path3 = 'Vx.txt'
+
+    await create_notepad(notepad_path1, '')
+    await create_notepad(notepad_path2, '')
+    await create_notepad(notepad_path3, '')
+
+
+async def save_to_note_pads(V, file_path):
+    await save_velocity_data(file_path, [V])
+
 
 
 # Example usage with random values
 async def main():
-    notepad_path = 'velocity_data.txt'
-    time_values = []
-    Vx_values = []
-    Vy_values = []
-    Vz_values = []
+    notepad_path = 'velocity_x_data.txt'
 
-    for iteration in range(1, 6):  # Simulating 5 iterations
-        # Simulating random velocity values
-        time_values.append(iteration)
-        Vx_values.append(random.uniform(1, 10))
-        Vy_values.append(random.uniform(1, 10))
-        Vz_values.append(random.uniform(1, 10))
+    # Open the file at the beginning of the loop (create an empty notepad initially)
+    await create_notepad(notepad_path, '')
 
-        # Save velocity data at each iteration
-        await save_velocity_data(notepad_path, time_values, Vx_values, Vy_values, Vz_values)
+    i = 0
+    while i < 10:
+        V = random.uniform(1, 10)
+
+        # Write to the notepad in each iteration
+        await save_to_note_pads(V, notepad_path)
+
+        i += 1
 
     print(f"Velocity data saved at: {notepad_path}")
-
 
 # Run the asyncio event loop
 asyncio.run(main())

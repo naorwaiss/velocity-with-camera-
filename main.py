@@ -4,6 +4,7 @@ from mavsdk import System
 from mavsdk.offboard import OffboardError, VelocityBodyYawspeed
 import time
 from drone_mothion_function import offboard, takeoff_velocity, camera_motion_simple, takeoff_presedoure,movment_camera
+from test_note import crate_notepad, save_to_note_pads
 
 async def check_camera_work(drone, camera_data_queue, timeout_duration):
     # this function not work - need to fix it
@@ -54,12 +55,15 @@ async def main():
 
     camera_started = await check_camera_work(drone, camera_data_queue, 10)
     if not camera_started:
+        #await drone.action.land()??
         return
 
     try:
         last_time = time.time()
         kf = initialize_kalman_filter()
+        await crate_notepad() #need to check if the textfile is open ??
         while True:
+
             #time check - elapsed is the time between the loops - this is importent for the PID
             current_time = time.time()
             elapsed = current_time - last_time
@@ -74,7 +78,8 @@ async def main():
             #start the camera movment
             await drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
             await offboard(drone)
-            await movment_camera(drone,filtered_x,filtered_y,x,y,z)
+            Vx,Vy,z = await movment_camera(drone,filtered_x,filtered_y,x,y,z)
+
 
 
 

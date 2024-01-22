@@ -1,7 +1,7 @@
 import asyncio
 from mavsdk import System
 from mavsdk.offboard import (OffboardError, VelocityBodyYawspeed)
-import math
+from test_note import save_to_note_pads
 
 
 
@@ -115,11 +115,14 @@ async def movment_camera(drone,filtered_x, filtered_y,x,y,z):
     Vx = (await convert(filtered_x,z))*(await sighn(x))
     Vy = (await convert(filtered_y,z)) * (await sighn(y))
 
+
     velocity_command = VelocityBodyYawspeed(Vy, Vx, 0.0, 0.0)
     await drone.offboard.set_velocity_body(velocity_command)
 
+
     # check the movment direction with the x,y and Vx, Vy
     print(f" speed: Vx={Vx}, Vy={Vy}, z={z}")
+    return Vx,Vy,z
 
 
 async def odomety(drone):
