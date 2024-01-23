@@ -8,14 +8,13 @@ code
 1) function to stop the loop
 2) need to gave some validation - if the drone is at some x,y (pixel and distance ) the drone need to move at some direction
 3) at function main - need to check if the camera not work the drone land
-4) at function matplotlib - need to check if the code is work
-5) the function that move the data - need to add to move the exel file - make is as function - run only this function (one time)
-6) combine the plot lib and the nootbook and the tet to exel to single script that need to run one time
+6) need to trunsfer the save plot from the jetson to the linux
 
 
 jetson --
 1) check if the jetson is get the pyrealsense - the new one
 2) install alot of dependasis - that run on the linux computer and i dont follow it
+3) need to check if all the code run on the jetson
 
 drone --
 
