@@ -109,21 +109,23 @@ async def sighn(value):
 
 
 
-async def movment_camera(drone,filtered_x, filtered_y,x,y,z):
+async def movment_camera(drone,filtered_x, filtered_y,x,y,z,Error_x_prev,Error_y_prev,delta_t):
     #doing some calculation:
-    Vx = (await convert(filtered_x,z))*(await sighn(x))
-    Vy = (await convert(filtered_y,z)) * (await sighn(y))
+    Vx_desire = (await convert(filtered_x,z))*(await sighn(x))
+    Vy_desire = (await convert(filtered_y,z)) * (await sighn(y))
     Vx_current, Vy_current, Vz_current = await odomety(drone)
+    Vx_current = -Vx_current # i think to change the sighn (need to test it more)
 
+    Vx_PID,Error_x = await PID(Vx_desire,Vx_current,delta_t,Error_x_prev)
+    Vy_PID, Error_y = await PID(Vy_desire, Vy_current, delta_t, Error_y_prev)
 
-
-    velocity_command = VelocityBodyYawspeed(Vy, Vx, 0.0, 0.0)
+    velocity_command = VelocityBodyYawspeed(Vy_PID, Vx_PID, 0.0, 0.0)
     await drone.offboard.set_velocity_body(velocity_command)
 
 
     # check the movment direction with the x,y and Vx, Vy
-    print(f" speed: Vx={Vx}, Vy={Vy}, z={z},Vx_current={Vx_current},Vy_current={Vy_current}")
-    return Vx,Vy,z,Vx_current,Vy_current
+    print(f" speed: Vx={Vx_PID}, Vy={Vy_PID}, z={z},Vx_current={Vx_current},Vy_current={Vy_current}")
+    return Vx_PID,Vy_PID,z,Vx_current,Vy_current,Error_x_prev,Error_y_prev
 
 
 async def odomety(drone):
@@ -166,8 +168,13 @@ async def PID(V_desierd,V_current,delta_t,Error_prev):
 
 
 
+async def PID_nan(V_desierd,V_current,delta_t,Error_prev):
+    #this function stop the use of the PID
+    V_PID = V_desierd
+    Error =0
 
 
+    return V_PID,Error
 
 
 

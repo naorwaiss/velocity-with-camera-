@@ -73,6 +73,7 @@ async def main():
         last_time = time.time()
         kf = initialize_kalman_filter()
         await crate_notepad() #need to check if the textfile is open ??
+        Error_x_prev= Error_y_prev=0
         while True:
 
             #time check - elapsed is the time between the loops - this is importent for the PID
@@ -89,7 +90,7 @@ async def main():
             #start the camera movment
             await drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
             await offboard(drone)
-            Vx,Vy,z,Vx_current,Vy_current = await movment_camera(drone,filtered_x,filtered_y,x,y,z)
+            Vx,Vy,z,Vx_current,Vy_current,Error_x_prev,Error_y_prev = await movment_camera(drone,filtered_x,filtered_y,x,y,z,Error_x_prev,Error_y_prev,elapsed)
             await save_data(drone,Vx,Vy,elapsed,Vx_current,Vy_current)
 
 
