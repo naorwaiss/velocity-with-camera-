@@ -9,7 +9,8 @@ code
 2) need to gave some validation - if the drone is at some x,y (pixel and distance ) the drone need to move at some direction
 3) at function main - need to check if the camera not work the drone land
 6) need to trunsfer the save plot from the jetson to the linux
-
+7) get the velcoity of the drone only at one place
+8) check if the data at the exel and in the python is the same ... add simple print
 
 jetson --
 1) check if the jetson is get the pyrealsense - the new one

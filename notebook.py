@@ -39,17 +39,13 @@ def format_number(num):
 
 
 async def crate_notepad():
-    notepad_path1 = 'delta_t.txt'
-    notepad_path2= 'Vy.txt'
-    notepad_path3 = 'Vx.txt'
-    notepad_path4 = 'Vx_current.txt'
-    notepad_path5 = 'Vx_current.txt'
 
-    await create_notepad(notepad_path1, '')
-    await create_notepad(notepad_path2, '')
-    await create_notepad(notepad_path3, '')
-    await create_notepad(notepad_path4, '')
-    await create_notepad(notepad_path5, '')
+
+    await create_notepad('delta_t.txt', '')
+    await create_notepad('Vx.txt' ,'')
+    await create_notepad('Vy.txt', '')
+    await create_notepad('Vx_current.txt', '')
+    await create_notepad('Vy_current.txt', '')
 
 async def save_to_note_pads(V, file_path):
     await save_velocity_data(file_path, [V])
