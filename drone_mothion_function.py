@@ -113,6 +113,8 @@ async def movment_camera(drone,filtered_x, filtered_y,x,y,z):
     #doing some calculation:
     Vx = (await convert(filtered_x,z))*(await sighn(x))
     Vy = (await convert(filtered_y,z)) * (await sighn(y))
+    Vx_current, Vy_current, Vz_current = await odomety(drone)
+
 
 
     velocity_command = VelocityBodyYawspeed(Vy, Vx, 0.0, 0.0)
@@ -120,8 +122,8 @@ async def movment_camera(drone,filtered_x, filtered_y,x,y,z):
 
 
     # check the movment direction with the x,y and Vx, Vy
-    print(f" speed: Vx={Vx}, Vy={Vy}, z={z}")
-    return Vx,Vy,z
+    print(f" speed: Vx={Vx}, Vy={Vy}, z={z},Vx_current={Vx_current},Vy_current={Vy_current}")
+    return Vx,Vy,z,Vx_current,Vy_current
 
 
 async def odomety(drone):
@@ -135,6 +137,33 @@ async def odomety(drone):
     #need to think if need to vhange this value to somthing that i knew??
     async for odometry in drone.telemetry.odometry():
         return odometry.velocity_body.x_m_s,odometry.velocity_body.y_m_s,odometry.velocity_body.z_m_s
+
+
+
+
+
+
+
+async def PID(V_desierd,V_current,delta_t,Error_prev):
+    """
+
+    :param V_desierd: v that go to the drone
+    :param V_current: velocity right now
+    :param delta_t: the time
+    :param Error_prev: the prev error for the D
+    :return: error and velocity after PID
+    """
+    #this function need to move data to the movment cameara and then to the main
+    kp = 0.4
+    kd = 0.04       #dont know what the value need to be...
+
+    Error = V_desierd-V_current
+    Deff = (Error-Error_prev)/delta_t
+
+    V_PID = kp*Error + kd*Deff
+
+    return V_PID,Error
+
 
 
 

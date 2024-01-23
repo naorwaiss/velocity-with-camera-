@@ -36,11 +36,10 @@ async def camera_manipulation(x, y, z, kf):
     return x_n,y_n
 
 
-async def save_data(drone,Vx,Vy,delta_t):
+async def save_data(drone,Vx,Vy,delta_t,Vx_current,Vy_current):
             await save_to_note_pads(delta_t, 'delta_t.txt')
             await save_to_note_pads(Vx,'Vx.txt')
             await save_to_note_pads(Vy, 'Vy.txt')
-            Vx_current,Vy_current,Vz_current = await odomety(drone)
             await save_to_note_pads(Vx_current,'Vx_current.txt')
             await save_to_note_pads(Vy_current, 'Vy_current.txt')
 
@@ -90,8 +89,8 @@ async def main():
             #start the camera movment
             await drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
             await offboard(drone)
-            Vx,Vy,z = await movment_camera(drone,filtered_x,filtered_y,x,y,z)
-            await save_data(drone,Vx,Vy,elapsed)
+            Vx,Vy,z,Vx_current,Vy_current = await movment_camera(drone,filtered_x,filtered_y,x,y,z)
+            await save_data(drone,Vx,Vy,elapsed,Vx_current,Vy_current)
 
 
 
