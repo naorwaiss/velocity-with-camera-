@@ -39,7 +39,7 @@ async def camera_manipulation(x, y, z, kf):
 async def save_data(drone,Vx,Vy,delta_t):
             await save_to_note_pads(delta_t, 'delta_t.txt')
             await save_to_note_pads(Vx,'Vx.txt')
-            await save_to_note_pads(Vx, 'Vy.txt')
+            await save_to_note_pads(Vy, 'Vy.txt')
             Vx_current,Vy_current,Vz_current = await odomety(drone)
             await save_to_note_pads(Vx_current,'Vx_current.txt')
             await save_to_note_pads(Vx_current, 'Vy_current.txt')

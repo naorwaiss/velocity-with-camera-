@@ -1,7 +1,7 @@
 import asyncio
 from mavsdk import System
 from mavsdk.offboard import (OffboardError, VelocityBodyYawspeed)
-from test_note import save_to_note_pads
+
 
 
 

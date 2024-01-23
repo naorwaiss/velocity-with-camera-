@@ -1,7 +1,8 @@
 import aiofiles
-import asyncio
-import random
 import os
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
 
 
 # Function to create a new notepad (file) with the specified content
@@ -54,5 +55,107 @@ async def save_to_note_pads(V, file_path):
     await save_velocity_data(file_path, [V])
 
 
+def convert_txt_to_excel():
+    # Get all .txt files in the current directory
+    txt_files = [file for file in os.listdir() if file.endswith('.txt')]
+
+    if not txt_files:
+        print("No text files found in the directory.")
+        return
+
+    # Create a Pandas DataFrame to hold the data
+    df = pd.DataFrame()
+
+    # Read each text file and append its content to the DataFrame
+    for txt_file in txt_files:
+        file_path = os.path.join(os.getcwd(), txt_file)
+        data = pd.read_csv(file_path, delimiter='\t')  # Assuming tab-separated values, adjust if needed
+        df = pd.concat([df, data], axis=1)
+
+    # Add column labels
+    column_labels = [os.path.splitext(file)[0] for file in txt_files]
+    df.columns = column_labels
+
+    # Write the DataFrame to an Excel file
+    excel_file_path = 'combined_data_with_labels.xlsx'
+    df.to_excel(excel_file_path, index=False)
+
+    print(f"Data has been combined and saved to {excel_file_path}")
+
+def plot(save_path=None):
+    file_path = '/home/naor/fhsbs/velocity-with-camera-/combined_data_with_labels.xlsx'
+    table_data = pd.read_excel(file_path)
+
+    # Find the first occurrence of NaN in any column
+    nan_row = table_data.isna().any(axis=1).idxmax()
+
+    # Remove rows from the NaN occurrence to the end
+    if not pd.isna(nan_row):
+        table_data = table_data.loc[:nan_row - 1, :]
+
+    # Determine the time step from the first column
+    delta_t = table_data.loc[0, 'delta_t']
+
+    # Create a new column for time
+    time_column = np.arange(0, len(table_data) * delta_t, delta_t)
+    table_data['Time'] = time_column
+
+    # Display the modified table
+    print(table_data)
+
+    # Extract data for plotting (replace with actual variable names)
+    V_x = table_data['Vx']
+    V_x_current = table_data['Vx_current']
+    V_y = table_data['Vy']
+    V_y_current = table_data['Vy_current']
+
+    # Plot V (x and x current) in function of t
+    plt.figure()
+    plt.plot(time_column, V_x, linewidth=2, label='V_x')
+    plt.plot(time_column, V_x_current, linewidth=2, label='V_x_current')
+    plt.xlabel('Time')
+    plt.ylabel('V (x)')
+    plt.title('V (x and x current) in function of time')
+    plt.legend()
+    plt.grid()
+
+    if save_path:
+        save_directory = os.path.join(save_path, 'plots')
+        os.makedirs(save_directory, exist_ok=True)
+        plt.savefig(os.path.join(save_directory, 'V_x_plot.png'))
+    else:
+        plt.show()
+
+    # Plot V (y and y current) in function of t
+    plt.figure()
+    plt.plot(time_column, V_y, linewidth=2, label='V_y')
+    plt.plot(time_column, V_y_current, linewidth=2, label='V_y_current')
+    plt.xlabel('Time')
+    plt.ylabel('V (y)')
+    plt.title('V (y and y current) in function of time')
+    plt.legend()
+    plt.grid()
+
+    if save_path:
+        plt.savefig(os.path.join(save_directory, 'V_y_plot.png'))
+    else:
+        plt.show()
+
+# Example usage with saving the plots in '/home/naor/fhsbs/velocity-with-camera-/plots/'
 
 
+
+
+def notebook():
+    #this function gave us the graph
+
+    convert_txt_to_excel()
+    plot(save_path='/home/naor/fhsbs/velocity-with-camera-/')
+
+
+
+
+
+
+if __name__ == "__main__":
+    notebook()
