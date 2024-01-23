@@ -156,8 +156,8 @@ async def PID(V_desierd,V_current,delta_t,Error_prev):
     :return: error and velocity after PID
     """
     #this function need to move data to the movment cameara and then to the main
-    kp = 0.4
-    kd = 0.04       #dont know what the value need to be...
+    kp = 0.8
+    kd = 0.1       #dont know what the value need to be...
 
     Error = V_desierd-V_current
     Deff = (Error-Error_prev)/delta_t

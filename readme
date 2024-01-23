@@ -9,7 +9,6 @@ code
 2) need to gave some validation - if the drone is at some x,y (pixel and distance ) the drone need to move at some direction
 3) at function main - need to check if the camera not work the drone land
 6) need to trunsfer the save plot from the jetson to the linux
-7) get the velcoity of the drone only at one place
 8) check if the data at the exel and in the python is the same ... add simple print
 
 jetson --
@@ -20,11 +19,10 @@ jetson --
 drone --
 
 2) doing some pid configuration - auto tune
-3) print camera holder
+
 
 
 dynamic function ---
-1) build pid
 2) check the direction of the velocity - i think that have some problem witht he minus and plus (at te graph)
 3) change the function that gave as the V value - the price function
 
