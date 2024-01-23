@@ -29,21 +29,16 @@ async def save_velocity_data(file_path, velocity_data):
     else:
         await create_notepad(file_path, table_string)
 
-# Function to save velocity data to a notepad (file) with a list of velocity values
-
-
 # Function to format a number with 4 decimal places
 def format_number(num):
     return "{:.4f}".format(num)
 
-
-
 async def crate_notepad():
     notepad_path1 = 'delta_t.txt'
-    notepad_path2= 'Vy.txt'
+    notepad_path2 = 'Vy.txt'
     notepad_path3 = 'Vx.txt'
     notepad_path4 = 'Vx_current.txt'
-    notepad_path5 = 'Vx_current.txt'
+    notepad_path5 = 'Vy_current.txt'  # changed from vx to vy
 
     await create_notepad(notepad_path1, '')
     await create_notepad(notepad_path2, '')
@@ -53,7 +48,6 @@ async def crate_notepad():
 
 async def save_to_note_pads(V, file_path):
     await save_velocity_data(file_path, [V])
-
 
 def convert_txt_to_excel():
     # Get all .txt files in the current directory
@@ -80,8 +74,6 @@ def convert_txt_to_excel():
     excel_file_path = 'combined_data_with_labels.xlsx'
     df.to_excel(excel_file_path, index=False)
 
-    print(f"Data has been combined and saved to {excel_file_path}")
-
 def plot(save_path=None):
     file_path = '/home/naor/fhsbs/velocity-with-camera-/combined_data_with_labels.xlsx'
     table_data = pd.read_excel(file_path)
@@ -89,9 +81,10 @@ def plot(save_path=None):
     # Find the first occurrence of NaN in any column
     nan_row = table_data.isna().any(axis=1).idxmax()
 
-    # Remove rows from the NaN occurrence to the end
-    if not pd.isna(nan_row):
-        table_data = table_data.loc[:nan_row - 1, :]
+    # Check if there are rows in the modified DataFrame
+    if table_data.empty:
+        print("Error: Empty DataFrame after removing NaN rows.")
+        return
 
     # Determine the time step from the first column
     delta_t = table_data.loc[0, 'delta_t']
@@ -99,9 +92,6 @@ def plot(save_path=None):
     # Create a new column for time
     time_column = np.arange(0, len(table_data) * delta_t, delta_t)
     table_data['Time'] = time_column
-
-    # Display the modified table
-    print(table_data)
 
     # Extract data for plotting (replace with actual variable names)
     V_x = table_data['Vx']
@@ -143,19 +133,10 @@ def plot(save_path=None):
 
 # Example usage with saving the plots in '/home/naor/fhsbs/velocity-with-camera-/plots/'
 
-
-
-
 def notebook():
-    #this function gave us the graph
-
+    # this function gave us the graph
     convert_txt_to_excel()
     plot(save_path='/home/naor/fhsbs/velocity-with-camera-/')
-
-
-
-
-
-
+    print("Notebook function completed.")
 if __name__ == "__main__":
     notebook()
