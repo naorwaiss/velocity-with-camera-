@@ -29,21 +29,16 @@ async def save_velocity_data(file_path, velocity_data):
     else:
         await create_notepad(file_path, table_string)
 
-# Function to save velocity data to a notepad (file) with a list of velocity values
-
-
 # Function to format a number with 4 decimal places
 def format_number(num):
     return "{:.4f}".format(num)
 
-
-
 async def crate_notepad():
     notepad_path1 = 'delta_t.txt'
-    notepad_path2= 'Vy.txt'
+    notepad_path2 = 'Vy.txt'
     notepad_path3 = 'Vx.txt'
     notepad_path4 = 'Vx_current.txt'
-    notepad_path5 = 'Vy_current.txt' # i change here from vx to vy
+    notepad_path5 = 'Vy_current.txt'  # changed from vx to vy
 
     await create_notepad(notepad_path1, '')
     await create_notepad(notepad_path2, '')
@@ -53,7 +48,6 @@ async def crate_notepad():
 
 async def save_to_note_pads(V, file_path):
     await save_velocity_data(file_path, [V])
-
 
 def convert_txt_to_excel():
     # Get all .txt files in the current directory
@@ -80,42 +74,12 @@ def convert_txt_to_excel():
     excel_file_path = 'combined_data_with_labels.xlsx'
     df.to_excel(excel_file_path, index=False)
 
-    print(f"Data has been combined and saved to {excel_file_path}")
-
 def plot(save_path=None):
     file_path = '/home/naor/fhsbs/velocity-with-camera-/combined_data_with_labels.xlsx'
     table_data = pd.read_excel(file_path)
 
-    # Print the original DataFrame
-    print("Original DataFrame:")
-    print(table_data)
-
-    # Check if 'delta_t' column exists and there are rows in the DataFrame
-    if 'delta_t' not in table_data.columns or table_data.empty:
-        print("Error: Missing 'delta_t' column or empty DataFrame.")
-        return
-
-    # Print the DataFrame after finding NaN rows
-    print("DataFrame after finding NaN rows:")
-    print(table_data)
-
-    # Check for NaN values in the DataFrame
-    print("NaN values in the DataFrame:")
-    print(table_data.isna().sum())
-
-    # Handle NaN values (example: filling NaN values with 0)
-    table_data = table_data.fillna(0)
-
-    # Print the DataFrame after filling NaN values
-    print("DataFrame after filling NaN values:")
-    print(table_data)
-
     # Find the first occurrence of NaN in any column
     nan_row = table_data.isna().any(axis=1).idxmax()
-
-    # Print the DataFrame after removing NaN rows
-    print("DataFrame after removing NaN rows:")
-    print(table_data)
 
     # Check if there are rows in the modified DataFrame
     if table_data.empty:
@@ -129,27 +93,11 @@ def plot(save_path=None):
     time_column = np.arange(0, len(table_data) * delta_t, delta_t)
     table_data['Time'] = time_column
 
-    # Display the modified table
-    print("DataFrame after adding 'Time' column:")
-    print(table_data)
-
     # Extract data for plotting (replace with actual variable names)
     V_x = table_data['Vx']
     V_x_current = table_data['Vx_current']
     V_y = table_data['Vy']
     V_y_current = table_data['Vy_current']
-
-    # Print data arrays before plotting
-    print("Time Column:")
-    print(time_column)
-    print("V_x:")
-    print(V_x)
-    print("V_x_current:")
-    print(V_x_current)
-    print("V_y:")
-    print(V_y)
-    print("V_y_current:")
-    print(V_y_current)
 
     # Plot V (x and x current) in function of t
     plt.figure()
@@ -189,15 +137,8 @@ def notebook():
     # this function gave us the graph
     convert_txt_to_excel()
     plot(save_path='/home/naor/fhsbs/velocity-with-camera-/')
+    print("Notebook function completed.")
 
-if __name__ == "__main__":
-    notebook()
-
-
-def notebook():
-    # this function gave us the graph
-    convert_txt_to_excel()
-    plot(save_path='/home/naor/fhsbs/velocity-with-camera-/')
 
 if __name__ == "__main__":
     notebook()

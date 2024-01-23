@@ -36,11 +36,11 @@ async def camera_manipulation(x, y, z, kf):
     return x_n,y_n
 
 
-async def save_data(drone,Vx,Vy,delta_t,Vx_current,Vy_current):
+async def save_data(drone,Vx,Vy,delta_t):
             await save_to_note_pads(delta_t, 'delta_t.txt')
             await save_to_note_pads(Vx,'Vx.txt')
             await save_to_note_pads(Vy, 'Vy.txt')
-            #Vx_current = -Vx_current #check if this line is work - need to check the direction of the drone
+            Vx_current,Vy_current,Vz_current = await odomety(drone)
             await save_to_note_pads(Vx_current,'Vx_current.txt')
             await save_to_note_pads(Vy_current, 'Vy_current.txt')
 
@@ -74,13 +74,12 @@ async def main():
         last_time = time.time()
         kf = initialize_kalman_filter()
         await crate_notepad() #need to check if the textfile is open ??
-        Error_x, Error_y = 0
         while True:
+
             #time check - elapsed is the time between the loops - this is importent for the PID
             current_time = time.time()
             elapsed = current_time - last_time
             last_time = current_time
-
 
             x, y, z = await camera_data_queue.get()
             filtered_x, filtered_y = await camera_manipulation(x, y, z, kf)
@@ -91,8 +90,8 @@ async def main():
             #start the camera movment
             await drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
             await offboard(drone)
-            Vx,Vy,z,Vx_current,Vy_current = await movment_camera(drone,filtered_x,filtered_y,x,y,z)
-            await save_data(drone,Vx,Vy,elapsed,Vx_current,Vy_current)
+            Vx,Vy,z = await movment_camera(drone,filtered_x,filtered_y,x,y,z)
+            await save_data(drone,Vx,Vy,elapsed)
 
 
 
