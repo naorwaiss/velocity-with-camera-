@@ -1,10 +1,12 @@
 import asyncio
-from camera import process_frames, pixel_to_meters, update_kalman_filter, initialize_kalman_filter
+from camera import process_frames, pixel_to_meters,butter_lowpass_filter
 from mavsdk import System
 from mavsdk.offboard import OffboardError, VelocityBodyYawspeed
 import time
 from drone_mothion_function import offboard, takeoff_velocity, odomety, takeoff_presedoure,movment_camera
 from notebook import crate_notepad, save_to_note_pads
+
+
 
 async def check_camera_work(drone, camera_data_queue, timeout_duration):
     # this function not work - need to fix it
@@ -19,21 +21,7 @@ async def check_camera_work(drone, camera_data_queue, timeout_duration):
         await drone.action.land()
         return False
 
-async def camera_manipulation(x, y, z, kf):
-    """
 
-    :param x: x value at pixle - the output from the camera
-    :param y:  y value at pixle - the output from the camera
-    :param z:  z  value at maters - the output from the camera
-    :param kf: some first value for the kalman filter
-    :return: the function return the value of the camera after two change:
-    1) move from pixel to meters
-    2) doing kalman filter to tha tdata (need to think if it neccecery)
-
-    """
-    x_n, y_n = await pixel_to_meters(x, y, 87, 58, 640, 480, z)
-    #filtered_x, filtered_y = update_kalman_filter(kf, x_n, y_n) #need to fix the kalman filter - it bring bad value []
-    return x_n,y_n
 
 
 async def save_data(drone,Vx,Vy,delta_t,Vx_current,Vy_current):
@@ -71,8 +59,9 @@ async def main():
 
     try:
         last_time = time.time()
-        kf = initialize_kalman_filter()
+
         await crate_notepad() #need to check if the textfile is open ??
+        filtered_x_prev=filtered_y_prev =0
         Error_x_prev= Error_y_prev=0
         while True:
 
@@ -82,7 +71,9 @@ async def main():
             last_time = current_time
 
             x, y, z = await camera_data_queue.get()
-            filtered_x, filtered_y = await camera_manipulation(x, y, z, kf)
+            x_n, y_n = await pixel_to_meters(x, y, 87, 58, 640, 480, z)
+            #filtered_x = await butter_lowpass_filter(filtered_x_prev, x_n)
+            #filtered_y = await butter_lowpass_filter(filtered_y_prev, y_n)
 
 
 
@@ -90,7 +81,7 @@ async def main():
             #start the camera movment
             await drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
             await offboard(drone)
-            Vx,Vy,z,Vx_current,Vy_current,Error_x_prev,Error_y_prev = await movment_camera(drone,filtered_x,filtered_y,x,y,z,Error_x_prev,Error_y_prev,elapsed)
+            Vx,Vy,z,Vx_current,Vy_current,Error_x_prev,Error_y_prev = await movment_camera(drone,x_n,y_n,x,y,z,Error_x_prev,Error_y_prev,elapsed)
             await save_data(drone,Vx,Vy,elapsed,Vx_current,Vy_current)
 
 

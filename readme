@@ -10,6 +10,7 @@ code
 3) at function main - need to check if the camera not work the drone land
 6) need to trunsfer the save plot from the jetson to the linux
 8) check if the data at the exel and in the python is the same ... add simple print
+9) low pass filter
 
 jetson --
 1) check if the jetson is get the pyrealsense - the new one

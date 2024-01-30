@@ -5,6 +5,8 @@ import pyrealsense2.pyrealsense2 as rs
 import os
 import math
 from filterpy.kalman import KalmanFilter
+from scipy.signal import butter, lfilter
+
 
 # this code is finish
 # At the Jetson, if the code runs from the console -- need: import pyrealsense2 as rs
@@ -37,26 +39,21 @@ async def pixel_to_meters(x_pixel, y_pixel, fov_horizontal, fov_vertical, image_
     return x_meters, y_meters
 
 
-def initialize_kalman_filter():
-    # need to fix this function
-    kf = KalmanFilter(dim_x=2, dim_z=2)  # Assuming 2D coordinates (x, y)
+async def butter_lowpass_filter(prev_value, current_value, order=1):
+    cutoff_frequency = 6  # Adjust this value based on your requirements
 
-    # Configure the Kalman filter parameters
-    kf.F = np.array([[1, 0], [0, 1]])  # State transition matrix
-    kf.H = np.array([[1, 0], [0, 1]])  # Measurement function
-    kf.R = np.eye(2) * 0.1             # Measurement uncertainty
-    kf.Q = np.eye(2) * 0.1             # Process noise
-    kf.P = np.eye(2) * 1               # Initial estimation uncertainty
+    nyquist = 0.5
+    normal_cutoff = cutoff_frequency / nyquist
 
-    return kf
+    b, a = butter(order, normal_cutoff, btype='low', analog=False)
 
-def update_kalman_filter(kf, x_n, y_n):
-    #need to fix this function --- it retrun the movment value at [] i need it at int
-    kf.predict()  # Predict the next state
-    kf.update([x_n, y_n])  # Update with the new measurements
+    # Apply the filter using lfilter
+    # Pass the last known value as the initial condition for continuity
+    filtered_value = lfilter(b, a, [current_value], zi=[prev_value])[0]
 
-    filtered_x, filtered_y = (kf.x[0]),(kf.x[1])
-    return filtered_x, filtered_y
+    # Extract the scalar value from the NumPy array and round to the nearest integer
+    return filtered_value[0]
+
 
 
 async def process_frames(queue):

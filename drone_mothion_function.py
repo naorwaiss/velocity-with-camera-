@@ -117,7 +117,7 @@ async def movment_camera(drone,filtered_x, filtered_y,x,y,z,Error_x_prev,Error_y
     Vx_current = -Vx_current # i think to change the sighn (need to test it more)
 
     Vx_PID,Error_x = await PID(Vx_desire,Vx_current,delta_t,Error_x_prev)
-    Vy_PID, Error_y = await PID(Vy_desire, Vy_current, delta_t, Error_y_prev)
+    Vy_PID,Error_y = await PID(Vy_desire, Vy_current, delta_t, Error_y_prev)
 
     velocity_command = VelocityBodyYawspeed(Vy_PID, Vx_PID, 0.0, 0.0)
     await drone.offboard.set_velocity_body(velocity_command)
@@ -125,7 +125,7 @@ async def movment_camera(drone,filtered_x, filtered_y,x,y,z,Error_x_prev,Error_y
 
     # check the movment direction with the x,y and Vx, Vy
     print(f" speed: Vx={Vx_PID}, Vy={Vy_PID}, z={z},Vx_current={Vx_current},Vy_current={Vy_current}")
-    return Vx_PID,Vy_PID,z,Vx_current,Vy_current,Error_x_prev,Error_y_prev
+    return Vx_PID,Vy_PID,z,Vx_current,Vy_current,Error_x,Error_y
 
 
 async def odomety(drone):
