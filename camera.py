@@ -4,7 +4,7 @@ import numpy as np
 import pyrealsense2.pyrealsense2 as rs
 import os
 import math
-from filterpy.kalman import KalmanFilter
+#from filterpy.kalman import KalmanFilter
 from scipy.signal import butter, lfilter
 
 
@@ -138,6 +138,7 @@ async def process_frames(queue):
                     # Adjust coordinates to be relative to the center of the frame
                     adjusted_x = center_x - 320
                     adjusted_y = 240 - center_y
+                    #print(f"adjusted x: {adjusted_x}, adjusted y: {adjusted_y}")
 
                     # Mark the center
                     cv2.drawContours(color_image, [largest_obstacle], -1, (0, 0, 255), 2)
