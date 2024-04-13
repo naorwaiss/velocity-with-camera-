@@ -47,7 +47,7 @@ async def main():
 
     await drone.action.hold()
     await takeoff_velocity(drone)  # Doing takeoff to 5-4 meters without GPS
-    await asyncio.sleep(5)
+    # await asyncio.sleep(5)
 
 
     camera_data_queue = asyncio.Queue()

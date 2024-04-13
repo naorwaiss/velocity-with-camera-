@@ -66,35 +66,21 @@ async def takeoff_velocity(drone):
     await asyncio.sleep(5)
 
     print ("stop the takeoff")
-    await drone.offboard.set_velocity_body(
-        VelocityBodyYawspeed(0.0, 0.0, 0.0, 0))
+    await drone.action.hold()
 
-
-
-
-
-
-
-
-async def M_value(z):
-
-    M = (19/49)*z+(3/49)
-    return M
 
 
 async def convert(value,z):
     value = abs(value)
     V=0
-    #convert to
-    if value<=0.1:
-        V=0
+    if value<=1:
+        V=0.25
         return V
-    elif (0.1<value<4):
-        #the function
-        V = (value-0.1)/(await M_value(z))
+    elif (1<value<2):
+        v=0.5
         return V
     else:
-        V = 2
+        V = 1.5
         return V
 
 async def sighn(value):
@@ -111,8 +97,8 @@ async def sighn(value):
 
 async def movment_camera(drone,filtered_x, filtered_y,x,y,z,Error_x_prev,Error_y_prev,delta_t):
     #doing some calculation:
-    Vx_desire = (await convert(filtered_x,z))*(await sighn(x))
-    Vy_desire = (await convert(filtered_y,z)) * (await sighn(y))
+    Vx_desire = (await convert(filtered_x))*(await sighn(x))
+    Vy_desire = (await convert(filtered_y)) * (await sighn(y))
     Vx_current, Vy_current, Vz_current = await odomety(drone)
     Vx_current = -Vx_current # i think to change the sighn (need to test it more)
 
