@@ -92,7 +92,7 @@ cmake --version
 
 unzip librealsense-2.48.0.zip -d /home/drone/naorp/cam
 
-#got to this cd
+#got to this cdhttps://stackoverflow.com/questions/62134563/how-to-give-permission-to-intel-realsense-camera-on-ubuntu
 mkdir build
 cd build
 sudo apt-get install libxinerama-dev
@@ -127,9 +127,16 @@ source ~/.bashrc
 3) https://github.com/IntelRealSense/librealsense/issues/6980#issuecomment-666858977 #update the cmake
 
 
+need to do this aldo to get udev bitch
+and check the camera frimware 
+https://stackoverflow.com/questions/62134563/how-to-give-permission-to-intel-realsense-camera-on-ubuntu
+
+
 # mavlink instalation
 #at this point we can install the mavproxy
 #can see this here also https://www.youtube.com/watch?v=nIuoCYauW3s
+
+
 
 sudo apt-get update
 sudo apt-get install python-pip python3-pip
