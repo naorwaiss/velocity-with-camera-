@@ -30,15 +30,19 @@ dynamic function ---
 ----------------------------------------------------------------------------------------------------------------------
 
 
+
+
 #how to download all the thing to the jestson and simple tasks :
 
 # drone-camera-forproject
 
+-----------------------------------------------step 1 -------------------------------------------------------------
 # python3.9.12 installation
 
 
 sudo apt update
 sudo apt upgrade
+sudo apt install wget
 sudo apt install -y build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev libbz2-dev
 wget https://www.python.org/ftp/python/3.9.12/Python-3.9.12.tgz
 
@@ -46,7 +50,7 @@ wget https://www.python.org/ftp/python/3.9.12/Python-3.9.12.tgz
 tar -xf Python-3.9.12.tgz
 cd Python-3.9.12
 ./configure --enable-optimizations
-make -j4  # You can change the number after -j to match the number of CPU cores for faster compilation.
+make -j4  # You can change the number after -j to match the number of CPU cores for faster compilation. (this take like 30 min)
 sudo make altinstall
 
 # after the installation finish - make the python as defount (python and python3)
@@ -55,20 +59,23 @@ sudo update-alternatives --install /usr/bin/python python /usr/local/bin/python3
 
 alternativ - check if the instalation finish - python --version /python3 --version.
 
-#pip problem
+
+
+#fix pip problem
 sudo apt update
-sudo apt install python3.9-distutils
+sudo apt install python3.9-distutils --- this command do some problem , ignore the problem 
 wget https://bootstrap.pypa.io/get-pip.py
 sudo python3.9 get-pip.py
 sudo python3.9 -m pip install --upgrade pip
 
+------------------------------------------------------------------step 2------------------------------------------------
 
-# let install cmake
+# install cmake
 
-cmake --version  #check you defoult camke version
+cmake --version  #check you defoult camke version - remmber it to 
 
 sudo apt-get install libcurl4-openssl-dev
-sudo apt install wget
+sudo apt-get install curl   ##install curl
 mkdir ~/cmake-source
 cd ~/cmake-source
 curl -LO https://cmake.org/files/v3.27/cmake-3.27.4.tar.gz
@@ -78,7 +85,7 @@ tar -xzvf cmake-3.27.4.tar.gz
 
 cd cmake-3.27.4
 ./bootstrap
-make -j2  # You can change the number after -j to match the number of CPU cores for faster compilation.
+make -j2  # You can change the number after -j to match the number of CPU cores for faster compilation. (the bootstrap and make take 30 - 60 min)
 sudo make install
 
 
@@ -86,13 +93,17 @@ sudo make install
 cmake --version
 
 
+-------------------------------------------------------step 3 --------------------------------------------------------------------------
+
 # intelrealsense
 #now go to intelreal sense git downlad and take some source file to install the sdk
 #from here:  https://github.com/IntelRealSense/librealsense/releases/
+need to take the source file with zip variation
 
 unzip librealsense-2.48.0.zip -d /home/drone/naorp/cam
 
-#got to this cdhttps://stackoverflow.com/questions/62134563/how-to-give-permission-to-intel-realsense-camera-on-ubuntu
+#got to this cd 
+https://stackoverflow.com/questions/62134563/how-to-give-permission-to-intel-realsense-camera-on-ubuntu
 mkdir build
 cd build
 sudo apt-get install libxinerama-dev
@@ -119,19 +130,30 @@ export PYTHONPATH=$PYTHONPATH:/home/drone/naorp/cam/librealsense-2.48.0/build/wr
 #after exit
 source ~/.bashrc
 
-#import problem- at the script need to import pymavlink as:import pyrealsense2.pyrealsense2 as rs
 
-#helps:
-1)https://github.com/IntelRealSense/librealsense/issues/12137 #me ask for help
-2)https://github.com/IntelRealSense/librealsense/issues/6964#issuecomment-707501049 #install intelrealsense
-3) https://github.com/IntelRealSense/librealsense/issues/6980#issuecomment-666858977 #update the cmake
-
+-----------------------------------------------------------------------step 4------------------------------------------------
 
 need to do this aldo to get udev bitch
 and check the camera frimware 
 https://stackoverflow.com/questions/62134563/how-to-give-permission-to-intel-realsense-camera-on-ubuntu
 
+#lets start 
+clone https://github.com/IntelRealSense/librealsense
+#cd to the clone 
+cd librealsense
+sudo cp config/99-realsense-libusb.rules /etc/udev/rules.d/
 
+#run this 2 command to update the ne udev rule 
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+
+
+check the realsense-veiwer to cehck if you got ditect camera 
+
+
+-----------------------------------------------------end of camera installation-------------------------------------------------
+-----------------------------------------------------------drone installation --------------------------------------------------
+--------------------------------------------------------------step 1 -----------------------------------------------------------
 # mavlink instalation
 #at this point we can install the mavproxy
 #can see this here also https://www.youtube.com/watch?v=nIuoCYauW3s
@@ -146,23 +168,20 @@ sudo mavproxy.py --master=/dev/ttyTHS1
 #at this point the mavproxy activate
 
 
-#to get premition - need to fix it ask tal
+#to get premition - need to fix it ask tal (not work to add it to the bashrc)
 sudo chmod a+rw /dev/ttyTHS1
 Sudo mavproxy.py –master=/dev/ttyTHS1
 
 
-#install package the asential to read qr code
-pip install pyzbar
-pip install opencv-python-headless
+pip install mavsdk
+
+---------------------------------------------------more installation --------------------------------------------------
 
 
 instalation for the data:
 pip install aiofiles
 
-
-
------------------------------------------------------
-
+-----------------------------------------------------computer commander installation ---------------------------------
 # run simulation
 run drone simulation with gazibo
 cd PX4-Autopilot/Tools/setup
@@ -171,6 +190,29 @@ cd PX4-Autopilot/Tools/setup
 
 cd ~/PX4-Autopilot
 make px4_sitl gazebo #this make regular dji drone
+
+--------------------------------------------------------------help and more --------------------------------------
+
+
+#import problem- at the script need to import pymavlink as:import pyrealsense2.pyrealsense2 as rs (not every time )
+
+#helps at the installation camera process
+1)https://github.com/IntelRealSense/librealsense/issues/12137 #me ask for help
+2)https://github.com/IntelRealSense/librealsense/issues/6964#issuecomment-707501049 #install intelrealsense
+3) https://github.com/IntelRealSense/librealsense/issues/6980#issuecomment-666858977 #update the cmake
+
+# udev rule problem 
+4) https://stackoverflow.com/questions/62134563/how-to-give-permission-to-intel-realsense-camera-on-ubuntu
+
+
+
+
+
+
+
+
+
+
 -------------------------------------------------------
 sudo apt-get install gz-garden
 s
